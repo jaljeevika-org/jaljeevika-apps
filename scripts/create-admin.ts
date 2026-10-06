@@ -6,7 +6,8 @@
  * The password is asked for interactively and never echoed. For automation
  * pipe it on stdin (… --password-stdin < file) — avoid putting it in shell
  * history. Use --force to turn an existing account into a Super Admin and
- * replace its password.
+ * replace its password. Use --temporary to make the person choose their own
+ * password at first sign-in (for a password you hand over to someone).
  */
 import { createInterface } from "node:readline";
 import { Writable } from "node:stream";
@@ -58,6 +59,7 @@ async function main() {
   const problems = passwordProblems(password, { email, name });
   if (problems.length) throw new Error(problems.join(" "));
 
+  const temporary = flag("temporary");
   const { client, target } = await connect(["DATABASE_URL_UNPOOLED", "DATABASE_URL"]);
   console.log(`Database: ${target}`);
   try {
@@ -72,25 +74,25 @@ async function main() {
       userId = existing.rows[0].id;
       await client.query(
         `UPDATE users SET name = $2, password_hash = $3, role_id = $4, is_active = true, email_verified = true,
-           email_verified_at = COALESCE(email_verified_at, now()), must_change_password = false, password_changed_at = now()
+           email_verified_at = COALESCE(email_verified_at, now()), must_change_password = $5, password_changed_at = now()
          WHERE id = $1`,
-        [userId, name, hash, role.rows[0].id],
+        [userId, name, hash, role.rows[0].id, temporary],
       );
       await client.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
     } else {
       const row = await client.query<{ id: string }>(
-        `INSERT INTO users (name, email, password_hash, role_id, email_verified, email_verified_at, password_changed_at)
-         VALUES ($1, $2, $3, $4, true, now(), now()) RETURNING id`,
-        [name, email, hash, role.rows[0].id],
+        `INSERT INTO users (name, email, password_hash, role_id, email_verified, email_verified_at, password_changed_at, must_change_password)
+         VALUES ($1, $2, $3, $4, true, now(), now(), $5) RETURNING id`,
+        [name, email, hash, role.rows[0].id, temporary],
       );
       userId = row.rows[0].id;
     }
     await client.query(
       `INSERT INTO audit_logs (user_id, action, target_type, target_id, metadata) VALUES ($1::uuid, $2, 'user', $1::text, $3)`,
-      [userId, existing.rowCount ? "user.promoted_super_admin" : "user.created", JSON.stringify({ email, via: "cli", role: "super_admin" })],
+      [userId, existing.rowCount ? "user.promoted_super_admin" : "user.created", JSON.stringify({ email, via: "cli", role: "super_admin", temporary })],
     );
     await client.query("COMMIT");
-    console.log(`${existing.rowCount ? "Updated" : "Created"} Super Admin ${email}. Sign in at ${process.env.APP_BASE_URL ?? "http://localhost:3000"}/login`);
+    console.log(`${existing.rowCount ? "Updated" : "Created"} Super Admin ${email}${temporary ? " (temporary password: they choose their own at first sign-in)" : ""}. Sign in at your portal address + /login`);
   } catch (err) {
     await client.query("ROLLBACK").catch(() => undefined);
     throw err;

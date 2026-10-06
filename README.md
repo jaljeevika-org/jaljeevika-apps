@@ -82,7 +82,10 @@ NODE_ENV=production npm run db:seed
 ```
 
 `NODE_ENV=production` makes the scripts read `.env.local` (production) instead
-of `.env.development.local` (your local database). Both commands are safe to run
+of `.env.development.local` (your local database). These examples use Bash
+syntax; in **Windows PowerShell** set the variable first, then run the command:
+`$env:NODE_ENV="production"; npm run db:migrate` (close the window afterwards,
+or run `Remove-Item Env:NODE_ENV`, before working on the local database again). Both commands are safe to run
 again: applied migrations are skipped and existing applications are left alone.
 Migrations live in `db/migrations/` and are recorded in `schema_migrations`;
 never edit an applied migration — add `002_….sql` instead.
@@ -156,6 +159,10 @@ NODE_ENV=production npm run create-admin -- --email you@jaljeevika.org --name "Y
 It asks for the password twice (hidden). The password must be at least 10
 characters and not a common one. Then sign in at `/login`.
 
+PowerShell: `$env:NODE_ENV="production"; npm run create-admin -- --email you@jaljeevika.org --name "Your Name"`
+
+- `--temporary` marks the password as temporary: the person must choose their
+  own at first sign-in (use this when you set a password for someone else).
 - `--force` turns an existing account into a Super Admin and replaces its password.
 - For automation: `… --password-stdin < file` (avoid passwords in shell history).
 
