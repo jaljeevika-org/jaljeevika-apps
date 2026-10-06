@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/* Dark mode follows the `dark` class on <html> (set before paint by the theme script). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Jaljeevika indigo, taken from the water-drop logo. */
+  --color-brand-50: #f2f2fd;
+  --color-brand-100: #e4e4fb;
+  --color-brand-200: #cdcdf6;
+  --color-brand-300: #abaaee;
+  --color-brand-400: #8885e3;
+  --color-brand-500: #6b67d6;
+  --color-brand-600: #5550c4;
+  --color-brand-700: #4641a6;
+  --color-brand-800: #3a3787;
+  --color-brand-900: #32306c;
+  --color-brand-950: #1e1d40;
+
+  /* Water teal accent. */
+  --color-water-400: #2cc4d6;
+  --color-water-500: #0fa9bd;
+  --color-water-600: #0e8fa3;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+
+  --animate-fade-in: fade-in 0.25s ease-out both;
+  --animate-rise: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Semantic surface/text tokens, switched for dark mode. */
+:root {
+  --page: #f5f6fb;
+  --surface: #ffffff;
+  --surface-2: #f0f1f8;
+  --line: #e2e4ef;
+  --ink: #1b1d2e;
+  --ink-2: #555a74;
+  --ink-3: #80849c;
+  color-scheme: light;
+}
+
+.dark {
+  --page: #0e0f1d;
+  --surface: #16172b;
+  --surface-2: #1e2038;
+  --line: #2c2e4c;
+  --ink: #e9eaf6;
+  --ink-2: #a8abc6;
+  --ink-3: #7c7f9c;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-page text-ink antialiased;
+    min-height: 100dvh;
+  }
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
+  }
+  input, select, textarea, button {
+    font: inherit;
+  }
+}
+
+@utility card {
+  @apply rounded-2xl border border-line bg-surface shadow-[0_1px_2px_rgba(20,22,50,0.04),0_8px_24px_-12px_rgba(20,22,50,0.10)];
+}
+
+@utility field {
+  @apply block w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[15px] text-ink placeholder:text-ink-3
+    transition-colors focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none
+    disabled:cursor-not-allowed disabled:opacity-60 aria-[invalid=true]:border-rose-500 aria-[invalid=true]:ring-rose-500/15;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

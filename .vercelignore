@@ -1,0 +1,15 @@
+# Never upload local secrets: Vercel gets its settings from
+# Project → Settings → Environment Variables instead.
+.env
+.env.*
+!.env.example
+.neon
+
+# Local-only folders
+.claude
+.next
+node_modules
+test-results
+playwright-report
+.e2e
+*.log

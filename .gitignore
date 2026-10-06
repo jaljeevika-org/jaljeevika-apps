@@ -1,0 +1,27 @@
+# Neon CLI context and pulled credentials
+.neon
+.env.local
+
+# All other env files hold secrets too; only the example is committed
+.env
+.env.*
+!.env.example
+
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# tests
+test-results/
+playwright-report/
+.e2e/
+
+# misc
+.DS_Store
+*.log
+.vercel
